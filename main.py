@@ -1,10 +1,11 @@
 # This is a sample Python script.
 import csv
 
+import requests
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from tradingview_ta import get_multiple_analysis, Interval
-from binance.spot import Spot
+# from binance.spot import Spot
 # print(dir(binance))
 balance = 100
 
@@ -19,8 +20,9 @@ balance = 100
 
 def buy_or_sell(what, symbol, time):
 
-    spot = Spot()
-    price = float(spot.ticker_price(symbol)['price'])
+    # spot = Spot()
+    # # price = float(spot.ticker_price(symbol)['price'])
+    price = float(requests.get(f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}").json()['price'])
 
     with open(f"result/{symbol}.csv", "r") as file:
         last_reader = list(csv.DictReader(file))
