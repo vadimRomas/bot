@@ -5,7 +5,6 @@ import csv
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from tradingview_ta import get_multiple_analysis, Interval
 from binance.spot import Spot
-from config import Config
 # print(dir(binance))
 balance = 100
 
@@ -35,8 +34,8 @@ def buy_or_sell(what, symbol, time):
         return
 
     old_price = float(last_reader['price'])
-    ten_minus = old_price - old_price * 0.03
-    ten_plus = old_price * 0.03 + old_price
+    ten_minus = old_price - old_price * 0.02
+    ten_plus = old_price * 0.02 + old_price
     print(f'symdol: {symbol}, price:{price}, what: {what}')
     if last_reader['event'] == what and ten_plus <= price >= ten_minus :
         with open(f"result/{symbol}.csv", "a") as file:
