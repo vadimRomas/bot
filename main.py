@@ -20,7 +20,7 @@ app.config['SECRET'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 if __name__ == '__main__':
-    socketio.run(app, host='127.0.0.1')
+    socketio.run(app, host='172.17.0.2')
 
 # app_celery = Celery('main', broker='redis://localhost:6379')
 
