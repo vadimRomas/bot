@@ -23,3 +23,4 @@ txaio==22.2.1
 typing_extensions==4.4.0
 urllib3==1.26.13
 zope.interface==5.5.2
+Flask~=2.2.2

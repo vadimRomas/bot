@@ -1,13 +1,28 @@
 # This is a sample Python script.
 import csv
 
+
 import requests
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from tradingview_ta import get_multiple_analysis, Interval
+
+
 # from binance.spot import Spot
 # print(dir(binance))
 balance = 100
+
+from flask import Flask, render_template
+from flask_socketio import SocketIO, send
+
+app = Flask(__name__)
+app.config['SECRET'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins='*')
+
+if __name__ == '__main__':
+    socketio.run(app, host='127.0.0.1')
+
+# app_celery = Celery('main', broker='redis://localhost:6379')
 
 
 # def sell(symbol):
@@ -18,8 +33,18 @@ balance = 100
 #     ...
 
 
-def buy_or_sell(what, symbol, time):
+@app.route("/")
+def hello_world():
+    # main.delay()
+    return render_template('main.html')
 
+    # Use a breakpoint in the code line below to debug your script.
+
+
+# Press the green button in the gutter to run the script.
+
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+def buy_or_sell(what, symbol, time):
     # spot = Spot()
     # # price = float(spot.ticker_price(symbol)['price'])
     price = float(requests.get(f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}").json()['price'])
@@ -38,8 +63,7 @@ def buy_or_sell(what, symbol, time):
     old_price = float(last_reader['price'])
     ten_minus = old_price - old_price * 0.02
     ten_plus = old_price * 0.02 + old_price
-    print(f'symdol: {symbol}, price:{price}, what: {what}')
-    if last_reader['event'] == what and ten_plus <= price >= ten_minus :
+    if last_reader['event'] == what and ten_plus <= price >= ten_minus:
         with open(f"result/{symbol}.csv", "a") as file:
             writer = csv.writer(file)
             writer.writerow([symbol, price, what, time])
@@ -59,10 +83,12 @@ def buy_or_sell(what, symbol, time):
     #     writer = csv.writer(file)
     #     writer.writerow([symbol, price, what, time])
     # client = Client(Config.binance_key, Config.binance_secret_key)
+    return f'symdol: {symbol}, price:{price}, what: {what}'
 
 
-
-def main():
+@socketio.on('message')
+def main(message):
+    # send('Start!', broadcast=True)
     print('Start!')
     symbols = ["BINANCE:XRPUSDT", "BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:BNBUSDT"]
     while True:
@@ -75,12 +101,4 @@ def main():
             summary = analysis[analys].summary
 
             if summary['RECOMMENDATION'] == 'STRONG_SELL' or summary['RECOMMENDATION'] == 'STRONG_BUY':
-                buy_or_sell(summary['RECOMMENDATION'], symbol, Interval.INTERVAL_15_MINUTES)
-    # Use a breakpoint in the code line below to debug your script.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    main()
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+                send(buy_or_sell(summary['RECOMMENDATION'], symbol, Interval.INTERVAL_15_MINUTES))
